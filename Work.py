@@ -6,6 +6,7 @@ from PyQt6.QtCore import *
 
 import numpy as np
 
+
 class MyDecision:
     alpha: list[float]
     betta: list[float]
@@ -72,7 +73,7 @@ class MyDecision:
 
         # vector<double>(points + 1)
         # FIXME
-        self.psi: List[float] = []
+        self.psi: List[float] = [0] * (num + 1)
 
     def funcAlpha(self, x: float, y: float, _y0: float) -> float:
         """ double funcAlpha(double x, double y, double _y0); """
@@ -93,30 +94,29 @@ class MyDecision:
         
         vecy0: List[float]
         my_try: List[float]
-        norma: float
-        iter_: int = 0
+        self.norma: float = None
+        self.iter_: int = 0
         
         self.SetY0(y, x)
         my_try = y
 
         def do_iter():
-            global norma
-            global iter_
+            global norma, iter_
             
             vecy0 = y
             
             self.progonka(x, y, vecy0)
             
-            norma = self.Norma(y, vecy0)
+            self.norma = self.Norma(y, vecy0)
             
-            iter_ += 1
-            if iter_ > 100:
+            self.iter_ += 1
+            if self.iter_ > 100:
                 # MessageBox(NULL, L"iter > 100", L"iter", NULL);
                 return False
             return True
         
         if do_iter():
-            while norma > self.delta:
+            while self.norma > self.delta:
                 res = do_iter()
                 if not res:
                     break
@@ -132,27 +132,28 @@ class MyDecision:
         x.append(self.new_x0)
         
         for i in range(1, self.points + 1, 1):
-            y.append(self.new_y0 + (self.new_yl - self.new_y0) * i / (self.points));
-            x.append(self.new_xl * i / self.points);
+            y.append(self.new_y0 + (self.new_yl - self.new_y0) * i / (self.points))
+            x.append(self.new_xl * i / self.points)
         pass
 
-    def Norma(self, y: List[float], y0: List[float]) -> float:
+    def Norma(self, y: List[float], vecy0: List[float]) -> float:
         """ double Norma(std::vector<double> y, std::vector<double> y0); """
         razn: float = 0
 
-        if y.size() != self.vecy0.size():
+        if len(y) != len(vecy0):
             # FIXME
             # MessageBox(NULL, L"Error", L"error y y0", NULL);
             return 0.0
 
-        for i in range(self.points + 1):
-            razn += (y[i] - self.vecy0[i]) * (y[i] - self.vecy0[i])
+        for i in range(self.points):
+            razn += (y[i] - vecy0[i]) * (y[i] - vecy0[i])
             
         return razn
 
     def Y_obr(self, x: List[float], y: List[float]) -> None:
         """ void Y_obr(std::vector<double>& x, std::vector<double>& y); """
-        if len(y) != len(x):
+        assert len(y) == len(x)
+        if not len(y) != len(x):
             # FIXME
             # MessageBox(NULL, L"Error", L"error x y", NULL);
             return
@@ -176,7 +177,7 @@ class MyDecision:
 
     def Eyler(self, x: List[float], vec1: List[float], function: int, vecy0: List[float]) -> None:
         """ void Eyler(std::vector<double>& x, std::vector<double>& vec1, int function, std::vector<double> vecy0); """
-        y: List[float]
+        # y: List[float]
 
         if function == 0:
             self.alpha = [0] * (self.points + 1)
@@ -186,7 +187,7 @@ class MyDecision:
             self.betta[0] = self.y0
 
             # for (int i = 1; i <= points; i++):
-            for i in range(1, self.points, 1):
+            for i in range(1, self.points + 1, 1):
                 self.alpha[i] = self.alpha[i - 1] + (self.alpha[i - 1]
                                                      * self.alpha[i - 1]
                                                      * self.funcQ(vecy0[i - 1]) + 1) * self.stepX
@@ -209,6 +210,6 @@ class MyDecision:
             # FIXME
             # vec1 = vector<double>(points + 1);
             vec1.clear()
-            for i in range(self.points):
+            for i in range(self.points + 1):
                 vec1.append(0)
                 vec1[i] = self.alpha[i] * self.psi[i] + self.betta[i]
