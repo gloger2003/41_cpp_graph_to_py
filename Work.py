@@ -71,6 +71,7 @@ class MyDecision:
         self.stepX = (self.new_xl) / self.points
 
         # vector<double>(points + 1)
+        # FIXME
         self.psi: List[float] = []
 
     def funcAlpha(self, x: float, y: float, _y0: float) -> float:
@@ -140,6 +141,7 @@ class MyDecision:
         razn: float = 0
 
         if y.size() != self.vecy0.size():
+            # FIXME
             # MessageBox(NULL, L"Error", L"error y y0", NULL);
             return 0.0
 
@@ -151,6 +153,7 @@ class MyDecision:
     def Y_obr(self, x: List[float], y: List[float]) -> None:
         """ void Y_obr(std::vector<double>& x, std::vector<double>& y); """
         if len(y) != len(x):
+            # FIXME
             # MessageBox(NULL, L"Error", L"error x y", NULL);
             return
 
@@ -203,6 +206,7 @@ class MyDecision:
                                                     * self.psi[i + 1]
                                                     + self.betta[i + 1])) * self.stepX
 
+            # FIXME
             # vec1 = vector<double>(points + 1);
             vec1.clear()
             for i in range(self.points):
